@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors'); 
 const morgan = require('morgan');
-const apiRoutes = require('./routes/route');
+const router = require('./routes/route');
 
 const app = express();
 
@@ -11,14 +11,8 @@ app.use(cors());
 app.use(morgan('tiny'));
 app.disable('x-powered-by');
 
-/**Routes*/
-// app.use('/login' ,(req,res)=>{
-//     res.status(201).send(`Route for login`);
-// })
-
-// app.use('/signup' ,(req,res)=>{
-//     res.status(201).send(`Route for signup`);
-// })
+/**Api routes */
+app.use('/api' , router);
 
 /**Mongodb connection*/
 const mongodb = require('./mongo/connection');

@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link , useNavigate} from 'react-router-dom';
+import axios from 'axios';
+import Cookies from 'js-cookie';
+
+/**Material Ui and Bootstrap imports */
 import { Button, Form } from 'react-bootstrap';
 import LoginImg from '../images/Login-amico.png';
 import IconButton from '@mui/material/IconButton';
@@ -15,48 +19,56 @@ import GoogleIcon from '@mui/icons-material/Google';
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
+    username: '',
     password: '',
   });
   const [notification, setNotification] = useState({ message: '', type: '' });
+  
+  const navigate = useNavigate();
 
   const handleChange = (prop) => (event) => {
     setFormData({ ...formData, [prop]: event.target.value });
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!validateEmail(formData.email)) {
-      setNotification({ message: 'Invalid email format', type: 'error' });
+    if(!formData.username){
+      setNotification({message:"Username is required.",type:'error'});
       return;
     }
-
     if (!formData.password) {
-      setNotification({
-        message: 'Password should be entered',
-        type: 'error',
-      });
+      setNotification({message:"Password is required.",type:'error'});
       return;
     }
 
-    // Simulate incorrect username or password
-    setNotification({ message: 'Incorrect username or password', type: 'error' });
+    try {
+      const response = await axios.post('http://localhost:8000/api/login', formData);
+
+      if (response.status === 200) {
+          const token = response.data.token;
+          setNotification({ message: response.data.msg, type: 'success' });
+
+          // Store the token securely (e.g., in a cookie or local storage)
+          Cookies.set('token', token); // Example using js-cookie
+
+          // Navigate to the dashboard
+          navigate('/dashboard', { state: { username: formData.username } });
+      } else {
+          setNotification({ message: response.data.error || 'Login failed', type: 'error' });
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+    }
   };
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
   const handleNotificationClose = () => setNotification({ message: '', type: '' });
 
-  const validateEmail = (email) => {
-    // Regular expression for a simple email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
   return (
-    <div className='container w-[60vw] h-[60vh] my-[20vh] mx-auto shadow-xl flex justify-between'>
-      <div className='container flex-col w-2/5 p-10'>
+    <div className='container w-[60vw] h-[70vh] my-[15vh] mx-auto shadow-xl flex justify-between'>
+      <div className='container flex-col w-2/5 p-5'>
         <h1 className='text-5xl font-semibold text-[#7A3986]'>Login</h1>
         <div className='flex my-4 text-xl'>
           <p>Don't have an account?</p>
@@ -66,7 +78,7 @@ const Login = () => {
         </div>
         {notification.message && (
           <div
-            className={`p-3 mb-4 text-white ${
+            className={`p-3 mb-4 text-white text-lg ${
               notification.type === 'error' ? 'bg-red-500' : 'bg-green-500'
             }`}
           >
@@ -80,16 +92,16 @@ const Login = () => {
           </div>
         )}
         <Form
-          className='mt-[4vh] mb-[2vh] h-[20vh] flex flex-col justify-between'
+          className='mt-[4vh] mb-[2vh] h-[22.5vh] flex flex-col justify-between'
           onSubmit={handleSubmit}
         >
           <FormControl className='my-3 w-full bg-[#f2e2f5]' variant='outlined'>
-            <InputLabel htmlFor='component-outlined'>Email</InputLabel>
+            <InputLabel htmlFor='component-outlined'>Username</InputLabel>
             <OutlinedInput
               id='component-outlined'
-              value={formData.email}
-              onChange={handleChange('email')}
-              label='Email'
+              value={formData.username}
+              onChange={handleChange('username')}
+              label='Username'
             />
           </FormControl>
           <FormControl className='my-3 w-full bg-[#f2e2f5]' variant='outlined'>

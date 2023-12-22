@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Form } from 'react-bootstrap';
+import axios from 'axios';
 import SignupImg from '../images/Sign up-amico.png';
 import IconButton from '@mui/material/IconButton';
 import OutlinedInput from '@mui/material/OutlinedInput';
@@ -9,6 +10,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import FormControl from '@mui/material/FormControl';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,54 +27,41 @@ const Signup = () => {
     setFormData({ ...formData, [prop]: event.target.value });
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-  
-    if (!formData.username) {
-      setNotification({ message: 'Username is required', type: 'error' });
+
+    // Client-side validation
+    if (!formData.username || formData.username.length < 4) {
+      setNotification({ message: 'Username should contain at least 4 characters', type: 'error' });
       return;
     }
 
-    if(formData.username.length < 4){
-      setNotification({ message: 'Username should contain more than 4 characters' , type:'error'});
-      return;
-    }
-  
     if (!validateEmail(formData.email)) {
       setNotification({ message: 'Invalid email format', type: 'error' });
       return;
     }
-  
-    if (formData.password.length === 0) {
-      setNotification({ message: 'Password field cannot be empty', type: 'error' });
+
+    if (formData.password.length === 0 || !(formData.password.length >= 8) || !validatePassword(formData.password)) {
+      setNotification({ message: 'Invalid password format (must have atleast 8 characters, containing at least one special character and one number)', type: 'error' });
       return;
     }
-  
-    if (!(formData.password.length >= 8 && formData.password.length <= 12)) {
-      setNotification({
-        message: 'Password must be between 8 and 12 characters',
-        type: 'error',
-      });
-      return;
-    }
-  
-    const passwordValidation = validatePassword(formData.password);
-  
-    if (!passwordValidation.valid) {
-      setNotification({
-        message: passwordValidation.message,
-        type: 'error',
-      });
-      return;
-    }
-  
+
     if (formData.password !== formData.confirmPassword) {
       setNotification({ message: 'Passwords do not match', type: 'error' });
       return;
     }
-  
-    // Simulate successful signup
-    setNotification({ message: 'Account created successfully!', type: 'success' });
+
+    try {
+      const response = await axios.post('http://localhost:8000/api/signup', formData);
+
+      if (response.status === 201) {
+        setNotification({ message: response.data.msg, type: 'success' });
+      } else {
+        setNotification({ message: response.data.error || 'Signup failed', type: 'error' });
+      }
+    } catch (error) {
+      console.error('Error during signup:', error);
+    }
   };
   
 
@@ -100,11 +89,11 @@ const Signup = () => {
   
   
   return (
-    <div className='container w-[60vw] h-[60vh] my-[20vh] mx-auto shadow-xl flex justify-between'>
+    <div className='container w-[60vw] h-[70vh] my-[15vh] mx-auto shadow-xl flex justify-between'>
       <div className='w-3/5 bg-slate-200'>
         <img src={SignupImg} className='w-100 min-h-[40vh] max-h-[60vh]' alt='Login' />
       </div>
-      <div className='container flex-col w-2/5 p-10'>
+      <div className='container flex-col w-2/5 p-5'>
         <h1 className='text-5xl font-semibold text-[#7A3986]'>Signup</h1>
         <div className='flex my-3 text-xl'>
           <p>Have an account?</p>
@@ -114,7 +103,7 @@ const Signup = () => {
         </div>
         {notification.message && (
           <div
-            className={`p-3 mb-4 text-[0.9rem] text-white ${
+            className={`p-3 mb-4 text-lg text-white ${
               notification.type === 'error' ? 'bg-red-500' : 'bg-green-500'
             }`}
           >
@@ -128,7 +117,7 @@ const Signup = () => {
           </div>
         )}
         <Form
-          className='mt-[2vh] mb-[2vh] h-[35vh] flex flex-col justify-between'
+          className='mt-[2vh] mb-[2vh] h-[42vh] flex flex-col justify-between'
           onSubmit={handleSubmit}
         >
           <FormControl className='my-3 w-full bg-[#f2e2f5]' variant='outlined'>

@@ -1,13 +1,20 @@
-// routes/route.js
 const express = require('express');
 const router = express.Router();
+const authenticateToken = require('../middleware/auth');
 
-router.get('/login', (req, res) => {
-    res.status(201).send('Route for login');
-});
+/**Import controllers */
+const Appcontroller = require('../controllers/Appcontroller');
 
-router.get('/signup', (req, res) => {
-    res.status(201).send('Route for signup');
-});
+/**POST ROUTES */
+//Register user
+router.route('/signup').post(Appcontroller.signup);
+
+//Login user
+router.route('/login').post(Appcontroller.login);
+
+/**GET ROUTES */
+//User Dashboard
+router.route('/user/:username').get(authenticateToken , Appcontroller.getUser);
+
 
 module.exports = router;
