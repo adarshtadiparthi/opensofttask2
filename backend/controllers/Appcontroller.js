@@ -1,7 +1,7 @@
 const UserModel = require('../model/UserSchema');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const ENV = require('../config');
+require('dotenv').config(); 
 const { authenticateToken } = require('../middleware/auth');
 
 /**POST: http://localhost:8000/api/signup 
@@ -66,7 +66,7 @@ async function login(req, res) {
                 userId: user._id,
                 username: user.username,
             },
-            ENV.JWT_SECRET,
+            process.env.JWT_SECRET, // Use process.env to access environment variables
             { expiresIn: "2h" }
         );
 

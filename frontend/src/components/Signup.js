@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Button, Form } from 'react-bootstrap';
+import { Link , useNavigate} from 'react-router-dom';
 import axios from 'axios';
+
+/**Material ui and bootstrap imports*/
+import { Button, Form } from 'react-bootstrap';
 import SignupImg from '../images/Sign up-amico.png';
 import IconButton from '@mui/material/IconButton';
 import OutlinedInput from '@mui/material/OutlinedInput';
@@ -22,6 +24,8 @@ const Signup = () => {
   });
 
   const [notification, setNotification] = useState({ message: '', type: '' });
+
+  const navigate = useNavigate();
 
   const handleChange = (prop) => (event) => {
     setFormData({ ...formData, [prop]: event.target.value });
@@ -56,12 +60,22 @@ const Signup = () => {
 
       if (response.status === 201) {
         setNotification({ message: response.data.msg, type: 'success' });
+        setTimeout(()=>{
+          navigate('/');
+        },2000);
       } else {
         setNotification({ message: response.data.error || 'Signup failed', type: 'error' });
       }
-    } catch (error) {
+    }catch (error) {
       console.error('Error during signup:', error);
+    
+      // Get a meaningful error message
+      const errorMessage = error.response.data.error || 'An error occurred during signup';
+    
+      // Set the notification with the error message
+      setNotification({ message: errorMessage, type: 'error' });
     }
+    
   };
   
 
@@ -97,7 +111,7 @@ const Signup = () => {
         <h1 className='text-5xl font-semibold text-[#7A3986]'>Signup</h1>
         <div className='flex my-3 text-xl'>
           <p>Have an account?</p>
-          <Link to='/login' className='text-[#BA68C8] underline'>
+          <Link to='/' className='text-[#BA68C8] underline'>
             Login
           </Link>
         </div>

@@ -7,7 +7,7 @@ frontend/node_modules
 backend/node_modules
 frontend/.env
 backend/.env
-backend/config.js
+
 
 # testing
 /coverage

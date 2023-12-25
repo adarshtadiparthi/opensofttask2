@@ -53,13 +53,22 @@ const Login = () => {
           Cookies.set('token', token); // Example using js-cookie
 
           // Navigate to the dashboard
-          navigate('/dashboard', { state: { username: formData.username } });
+          setTimeout(()=>{
+            navigate('/dashboard', { state: { username: formData.username } });
+          },1000);
       } else {
           setNotification({ message: response.data.error || 'Login failed', type: 'error' });
       }
     } catch (error) {
       console.error('Error during login:', error);
+    
+      // Log the entire error object
+      console.error(error);
+    
+      // Set a generic error message
+      setNotification({ message: 'Login failed. Please try again.', type: 'error' });
     }
+    
   };
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
